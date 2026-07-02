@@ -34,11 +34,24 @@ export const api = {
   predict: (concept: string) =>
     request<PredictResponse>(`/predict?concept=${encodeURIComponent(concept)}`),
 
-  sendAgentMessage: (message: string, sessionId?: string) =>
-    request<AgentResponse>('/agent', {
+  sendAgentMessage: (message: string, sessionId?: string) => {
+    const provider = localStorage.getItem('dna_llm_provider') || undefined;
+    const apiKey = localStorage.getItem('dna_llm_api_key') || undefined;
+    const model = localStorage.getItem('dna_llm_model') || undefined;
+    const customBaseUrl = localStorage.getItem('dna_llm_base_url') || undefined;
+
+    return request<AgentResponse>('/agent', {
       method: 'POST',
-      body: JSON.stringify({ message, session_id: sessionId }),
-    }),
+      body: JSON.stringify({ 
+        message, 
+        session_id: sessionId,
+        provider,
+        api_key: apiKey,
+        model,
+        custom_base_url: customBaseUrl
+      }),
+    });
+  },
 
 
   generateSentence: (concept: string) =>

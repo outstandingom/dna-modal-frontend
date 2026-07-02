@@ -8,6 +8,7 @@ import ApiExplorer from './components/ApiExplorer'
 import GraphMode from './components/GraphMode'
 import Auth from './components/Auth'
 import './index.css'
+import SettingsModal from './components/SettingsModal'
 
 type Tab = 'chat' | 'api' | 'graph'
 
@@ -18,6 +19,7 @@ function Dashboard({ user }: { user: User }) {
   const [isOnline, setIsOnline] = useState(false)
   const [totalConcepts, setTotalConcepts] = useState(0)
   const [totalRelationships, setTotalRelationships] = useState(0)
+  const [showSettings, setShowSettings] = useState(false)
 
   const fetchStats = useCallback(async () => {
     try {
@@ -72,6 +74,16 @@ function Dashboard({ user }: { user: User }) {
         </nav>
 
         <div className="topbar-status">
+          <button 
+            onClick={() => setShowSettings(true)} 
+            style={{ 
+              background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px',
+              padding: '4px', marginRight: '8px', color: 'var(--text-muted)'
+            }}
+            title="AI Settings"
+          >
+            ⚙️
+          </button>
           <div className={`status-dot ${isOnline ? 'online' : 'offline'}`} />
           <span>{isOnline ? 'Live' : 'Offline'}</span>
           <div className="stat-chip">Nodes: <span>{totalConcepts}</span></div>
@@ -81,6 +93,8 @@ function Dashboard({ user }: { user: User }) {
           <button className="logout-btn" onClick={handleSignOut} title="Sign out">⏻</button>
         </div>
       </header>
+
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
 
       <main className="main-content">
         {activeTab === 'chat' && <ChatMode onGraphUpdate={fetchStats} userId={user.id} />}
