@@ -12,9 +12,10 @@ interface Message {
 
 interface Props {
   onGraphUpdate: () => void
+  userId?: string
 }
 
-export default function ChatMode({ onGraphUpdate }: Props) {
+export default function ChatMode({ onGraphUpdate, userId }: Props) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -33,7 +34,7 @@ export default function ChatMode({ onGraphUpdate }: Props) {
     setMessages(prev => [...prev, userMsg])
     setLoading(true)
     try {
-      const res = await api.sendAgentMessage(text)
+      const res = await api.sendAgentMessage(text, userId)
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',

@@ -1,13 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { supabase } from './lib/supabase'
+import type { User } from '@supabase/supabase-js'
 import { api } from './services/api'
 import ChatMode from './components/ChatMode'
 import ApiExplorer from './components/ApiExplorer'
 import GraphMode from './components/GraphMode'
+import Auth from './components/Auth'
 import './index.css'
 
 type Tab = 'chat' | 'api' | 'graph'
 
-export default function App() {
+// ── Protected Dashboard ───────────────────────────────────────
+function Dashboard({ user }: { user: User }) {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<Tab>('chat')
   const [isOnline, setIsOnline] = useState(false)
   const [totalConcepts, setTotalConcepts] = useState(0)
@@ -31,6 +37,14 @@ export default function App() {
     return () => clearInterval(interval)
   }, [fetchStats])
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    navigate('/auth')
+  }
+
+  const avatarLetter = user.email?.[0].toUpperCase() ?? '?'
+  const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+
   return (
     <div className="app">
       <header className="topbar">
@@ -52,15 +66,9 @@ export default function App() {
         </div>
 
         <nav className="topbar-tabs">
-          <button className={`tab-btn ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>
-            🤖 Chat
-          </button>
-          <button className={`tab-btn ${activeTab === 'api' ? 'active' : ''}`} onClick={() => setActiveTab('api')}>
-            🛠️ API Explorer
-          </button>
-          <button className={`tab-btn ${activeTab === 'graph' ? 'active' : ''}`} onClick={() => setActiveTab('graph')}>
-            🕸️ Graph
-          </button>
+          <button className={`tab-btn ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>🤖 Chat</button>
+          <button className={`tab-btn ${activeTab === 'api' ? 'active' : ''}`} onClick={() => setActiveTab('api')}>🛠️ API Explorer</button>
+          <button className={`tab-btn ${activeTab === 'graph' ? 'active' : ''}`} onClick={() => setActiveTab('graph')}>🕸️ Graph</button>
         </nav>
 
         <div className="topbar-status">
@@ -68,14 +76,59 @@ export default function App() {
           <span>{isOnline ? 'Live' : 'Offline'}</span>
           <div className="stat-chip">Nodes: <span>{totalConcepts}</span></div>
           <div className="stat-chip">Bonds: <span>{totalRelationships}</span></div>
+          {/* User avatar + logout */}
+          <div className="user-avatar" title={displayName}>{avatarLetter}</div>
+          <button className="logout-btn" onClick={handleSignOut} title="Sign out">⏻</button>
         </div>
       </header>
 
       <main className="main-content">
-        {activeTab === 'chat' && <ChatMode onGraphUpdate={fetchStats} />}
+        {activeTab === 'chat' && <ChatMode onGraphUpdate={fetchStats} userId={user.id} />}
         {activeTab === 'api' && <ApiExplorer />}
         {activeTab === 'graph' && <GraphMode />}
       </main>
     </div>
+  )
+}
+
+// ── Auth Guard ────────────────────────────────────────────────
+function AuthGuard() {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="auth-page">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, color: 'var(--text-muted)' }}>
+          <div className="spinner" style={{ width: 40, height: 40, borderWidth: 3 }} />
+          <p>Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return user ? <Dashboard user={user} /> : <Navigate to="/auth" replace />
+}
+
+// ── Root App ──────────────────────────────────────────────────
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/*" element={<AuthGuard />} />
+      </Routes>
+    </BrowserRouter>
   )
 }

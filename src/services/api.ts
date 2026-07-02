@@ -34,11 +34,12 @@ export const api = {
   predict: (concept: string) =>
     request<PredictResponse>(`/predict?concept=${encodeURIComponent(concept)}`),
 
-  sendAgentMessage: (message: string) =>
+  sendAgentMessage: (message: string, sessionId?: string) =>
     request<AgentResponse>('/agent', {
       method: 'POST',
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, session_id: sessionId }),
     }),
+
 
   generateSentence: (concept: string) =>
     request<SentenceResponse>('/sentence', {
