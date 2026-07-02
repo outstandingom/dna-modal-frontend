@@ -71,19 +71,17 @@ function Dashboard({ user }: { user: User }) {
           <button className={`tab-btn ${activeTab === 'chat' ? 'active' : ''}`} onClick={() => setActiveTab('chat')}>🤖 Chat</button>
           <button className={`tab-btn ${activeTab === 'api' ? 'active' : ''}`} onClick={() => setActiveTab('api')}>🛠️ API Explorer</button>
           <button className={`tab-btn ${activeTab === 'graph' ? 'active' : ''}`} onClick={() => setActiveTab('graph')}>🕸️ Graph</button>
+          <button 
+            onClick={() => setShowSettings(true)} 
+            className="tab-btn"
+            style={{ color: '#06b6d4', fontWeight: 'bold' }}
+            title="AI Settings"
+          >
+            ⚙️ AI Settings
+          </button>
         </nav>
 
         <div className="topbar-status">
-          <button 
-            onClick={() => setShowSettings(true)} 
-            style={{ 
-              background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px',
-              padding: '4px', marginRight: '8px', color: 'var(--text-muted)'
-            }}
-            title="AI Settings"
-          >
-            ⚙️
-          </button>
           <div className={`status-dot ${isOnline ? 'online' : 'offline'}`} />
           <span>{isOnline ? 'Live' : 'Offline'}</span>
           <div className="stat-chip">Nodes: <span>{totalConcepts}</span></div>
