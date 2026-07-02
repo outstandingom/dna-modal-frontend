@@ -167,7 +167,7 @@ const styles = {
     zIndex: 1000,
     backdropFilter: 'blur(4px)',
   },
-  modal: { backgroundColor: 'var(--surface)', borderRadius: '12px', padding: '24px', width: '95%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 10px 25px rgba(0,0,0,0.5)', border: '1px solid var(--border)' },
+  modal: { backgroundColor: 'var(--surface)', borderRadius: '12px', padding: '24px', width: '95%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' as const, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', border: '1px solid var(--border)' },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
