@@ -34,7 +34,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
       .catch(() => {
         // Fallback list
         setProviders([
-          { id: 'groq', name: 'Groq', default_model: 'llama-3.1-70b-versatile', free_tier: true, get_key_url: 'https://console.groq.com/keys', requires_base_url: false },
+          { id: 'groq', name: 'Groq', default_model: 'llama-3.3-70b-versatile', free_tier: true, get_key_url: 'https://console.groq.com/keys', requires_base_url: false },
           { id: 'gemini', name: 'Google Gemini', default_model: 'gemini-2.0-flash', free_tier: true, get_key_url: 'https://aistudio.google.com/apikey', requires_base_url: false },
           { id: 'openai', name: 'OpenAI', default_model: 'gpt-4o-mini', free_tier: false, get_key_url: 'https://platform.openai.com/api-keys', requires_base_url: false },
           { id: 'huggingface', name: 'Hugging Face', default_model: 'Qwen/Qwen2.5-72B-Instruct', free_tier: true, get_key_url: 'https://huggingface.co/settings/tokens', requires_base_url: false },
