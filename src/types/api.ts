@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://34.229.108.40:7860';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export interface AgentResponse {
   response: string;
