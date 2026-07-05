@@ -25,7 +25,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
   useEffect(() => {
     // Fetch providers from backend if possible, else use fallback list
-    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://34.229.108.40:7860'}/providers`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://ec2-13-217-0-95.compute-1.amazonaws.com:7860'}/providers`)
       .then(res => res.json())
       .then(data => {
         setProviders(data.providers || []);
