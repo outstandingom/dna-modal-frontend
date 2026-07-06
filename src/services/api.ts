@@ -83,6 +83,16 @@ export const api = {
       body: JSON.stringify({ concept_a, concept_b, weight, color }),
     }),
 
+  getProjectionInfo: () => request<object>('/projection/info'),
+
+  retrainProjection: () => request<object>('/projection/retrain', { method: 'POST' }),
+
+  loadKnowledge: (source: string) =>
+    request<object>('/knowledge/load', {
+      method: 'POST',
+      body: JSON.stringify({ source }),
+    }),
+
   evaluate: (condition: object, action: string) =>
     request<object>('/evaluate', {
       method: 'POST',

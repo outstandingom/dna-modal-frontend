@@ -34,6 +34,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
       .catch(() => {
         // Fallback list
         setProviders([
+          { id: 'local_graph', name: 'Independent Graph Mode (No LLM)', default_model: 'native-12-dim-vectors', free_tier: true, get_key_url: '', requires_base_url: false },
           { id: 'groq', name: 'Groq', default_model: 'llama-3.3-70b-versatile', free_tier: true, get_key_url: 'https://console.groq.com/keys', requires_base_url: false },
           { id: 'gemini', name: 'Google Gemini', default_model: 'gemini-2.0-flash', free_tier: true, get_key_url: 'https://aistudio.google.com/apikey', requires_base_url: false },
           { id: 'openai', name: 'OpenAI', default_model: 'gpt-4o-mini', free_tier: false, get_key_url: 'https://platform.openai.com/api-keys', requires_base_url: false },

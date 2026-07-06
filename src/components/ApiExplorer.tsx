@@ -13,6 +13,7 @@ interface EndpointDef {
   method: 'GET' | 'POST'
   path: string
   description: string
+  category?: 'DNA Model API' | 'Graph Data API' | 'Utility API'
   fields?: EndpointField[]
   call: (vals: Record<string, string>) => Promise<unknown>
 }
@@ -21,44 +22,52 @@ const ENDPOINTS: EndpointDef[] = [
   {
     method: 'GET', path: '/ping',
     description: 'Check if the server is alive.',
+    category: 'Utility API',
     call: () => api.ping(),
   },
   {
     method: 'GET', path: '/health',
     description: 'Full health status of the knowledge graph.',
+    category: 'Utility API',
     call: () => api.health(),
   },
   {
     method: 'GET', path: '/concepts',
     description: 'List all concepts stored in the knowledge graph.',
+    category: 'Graph Data API',
     call: () => api.getConcepts(),
   },
   {
     method: 'GET', path: '/global-context',
     description: 'Get global graph statistics (total nodes, bonds, centroid).',
+    category: 'Graph Data API',
     call: () => api.getGlobalContext(),
   },
   {
     method: 'GET', path: '/predict',
     description: 'Run fuzzy 12-dimensional prediction for a concept.',
+    category: 'DNA Model API',
     fields: [{ name: 'concept', label: 'Concept', placeholder: 'e.g. login' }],
     call: (v) => api.predict(v.concept || ''),
   },
   {
     method: 'POST', path: '/agent',
     description: 'Autonomous LLM agent — the model decides which tool to use.',
+    category: 'DNA Model API',
     fields: [{ name: 'message', label: 'Message', placeholder: 'e.g. A user cannot log in, what should I do?' }],
     call: (v) => api.sendAgentMessage(v.message || ''),
   },
   {
     method: 'POST', path: '/sentence',
     description: 'Generate a descriptive sentence for a concept.',
+    category: 'DNA Model API',
     fields: [{ name: 'concept', label: 'Concept', placeholder: 'e.g. authentication' }],
     call: (v) => api.generateSentence(v.concept || ''),
   },
   {
     method: 'POST', path: '/search/essence',
     description: 'Search by essence dimensions (physical features).',
+    category: 'DNA Model API',
     fields: [
       { name: 'query', label: 'Query', placeholder: 'e.g. password reset' },
       { name: 'top_k', label: 'Top K Results', placeholder: '5' },
@@ -68,6 +77,7 @@ const ENDPOINTS: EndpointDef[] = [
   {
     method: 'POST', path: '/search/identity',
     description: 'Search by identity dimensions (semantic features).',
+    category: 'DNA Model API',
     fields: [
       { name: 'query', label: 'Query', placeholder: 'e.g. billing issue' },
       { name: 'top_k', label: 'Top K Results', placeholder: '5' },
@@ -77,6 +87,7 @@ const ENDPOINTS: EndpointDef[] = [
   {
     method: 'POST', path: '/relationships/add',
     description: 'Manually add a weighted relationship between two concepts.',
+    category: 'Graph Data API',
     fields: [
       { name: 'concept_a', label: 'Concept A', placeholder: 'e.g. login issue' },
       { name: 'concept_b', label: 'Concept B', placeholder: 'e.g. account locked' },
@@ -84,6 +95,25 @@ const ENDPOINTS: EndpointDef[] = [
       { name: 'color', label: 'Relation Type', options: ['CAUSES', 'IS_A', 'HAS', 'RELATED'] },
     ],
     call: (v) => api.addRelationship(v.concept_a || '', v.concept_b || '', Number(v.weight) || 0.8, v.color || 'RELATED'),
+  },
+  {
+    method: 'GET', path: '/projection/info',
+    description: 'Get information about the 128->12 dimension projection layer.',
+    category: 'DNA Model API',
+    call: () => api.getProjectionInfo(),
+  },
+  {
+    method: 'POST', path: '/projection/retrain',
+    description: 'Retrain the projection layer from current concept vectors.',
+    category: 'DNA Model API',
+    call: () => api.retrainProjection(),
+  },
+  {
+    method: 'POST', path: '/knowledge/load',
+    description: 'Dynamically load a built-in knowledge domain (e.g. technology, history, science).',
+    category: 'Graph Data API',
+    fields: [{ name: 'source', label: 'Knowledge Source', placeholder: 'e.g. technology' }],
+    call: (v) => api.loadKnowledge(v.source || 'technology'),
   },
 ]
 
@@ -109,7 +139,7 @@ function EndpointCard({ ep }: { ep: EndpointDef }) {
   }
 
   return (
-    <div className="endpoint-card">
+    <div className={`endpoint-card ${ep.category === 'DNA Model API' ? 'dna-highlight' : ''}`}>
       <div className="endpoint-header" onClick={() => setOpen(o => !o)}>
         <span className={`method-badge method-${ep.method}`}>{ep.method}</span>
         <code className="endpoint-path">{ep.path}</code>
@@ -154,15 +184,23 @@ function EndpointCard({ ep }: { ep: EndpointDef }) {
 }
 
 export default function ApiExplorer() {
-  const getEndpoints = ENDPOINTS.filter(e => e.method === 'GET')
-  const postEndpoints = ENDPOINTS.filter(e => e.method === 'POST')
+  const categories = ['DNA Model API', 'Graph Data API', 'Utility API'] as const
 
   return (
     <div className="api-explorer">
-      <div className="api-section-title">🟢 GET Endpoints</div>
-      {getEndpoints.map(ep => <EndpointCard key={ep.path} ep={ep} />)}
-      <div className="api-section-title">🟣 POST Endpoints</div>
-      {postEndpoints.map(ep => <EndpointCard key={ep.path} ep={ep} />)}
+      {categories.map(cat => {
+        const catEndpoints = ENDPOINTS.filter(e => (e.category || 'Utility API') === cat)
+        if (catEndpoints.length === 0) return null
+        return (
+          <div key={cat} className="api-category-group">
+            <div className={`api-section-title ${cat === 'DNA Model API' ? 'dna-title' : ''}`}>
+              {cat === 'DNA Model API' ? '🧬 ' : cat === 'Graph Data API' ? '🕸️ ' : '⚙️ '}
+              {cat}
+            </div>
+            {catEndpoints.map(ep => <EndpointCard key={ep.path} ep={ep} />)}
+          </div>
+        )
+      })}
     </div>
   )
 }
