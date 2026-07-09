@@ -32,33 +32,12 @@ export default function GraphMode({ mini = false }: Props) {
   const fetchGraph = useCallback(async () => {
     try {
       setError('')
-      const concepts = await api.getConcepts()
-      const keys = Object.keys(concepts)
-      if (keys.length === 0) { setLoading(false); return }
-
-      const nodes: GraphNode[] = keys.map(k => ({
-        id: k,
-        domain: concepts[k]?.domain || 'general',
-        importance: concepts[k]?.importance || 1,
-      }))
-
-      // Build links by sampling predictions for top nodes
-      const links: GraphLink[] = []
-      const sampleNodes = keys.slice(0, 10)
-      await Promise.allSettled(
-        sampleNodes.map(async (concept) => {
-          try {
-            const pred = await api.predict(concept)
-            Object.entries(pred.fuzzy_predictions || {}).forEach(([target, score]) => {
-              if (target !== concept && score > 0.2 && keys.includes(target)) {
-                links.push({ source: concept, target, weight: score as number, color: 'RELATED' })
-              }
-            })
-          } catch { /* skip */ }
-        })
-      )
-
-      setGraphData({ nodes, links })
+      const data = await api.getGraph()
+      if (!data || data.nodes.length === 0) { 
+        setLoading(false); 
+        return; 
+      }
+      setGraphData(data)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to load graph')
     } finally {

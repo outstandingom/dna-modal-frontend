@@ -27,6 +27,8 @@ export const api = {
 
   health: () => request<HealthResponse>('/health'),
 
+  getGraph: () => request<GraphData>('/graph'),
+
   getConcepts: () => request<ConceptsResponse>('/concepts'),
 
   getGlobalContext: () => request<GlobalContextResponse>('/global-context'),
