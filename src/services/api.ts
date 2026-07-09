@@ -8,6 +8,7 @@ import {
   SentenceResponse,
   SearchResponse,
   AddRelationshipResponse,
+  GraphData,
 } from '../types/api';
 
 const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
