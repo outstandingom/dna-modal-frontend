@@ -185,9 +185,57 @@ function EndpointCard({ ep }: { ep: EndpointDef }) {
 
 export default function ApiExplorer() {
   const categories = ['DNA Model API', 'Graph Data API', 'Utility API'] as const
+  const [orchMessage, setOrchMessage] = useState('')
+  const [orchResponse, setOrchResponse] = useState<string | null>(null)
+  const [orchLoading, setOrchLoading] = useState(false)
+  const [orchError, setOrchError] = useState(false)
+
+  const handleOrchestrate = async () => {
+    if (!orchMessage.trim()) return
+    setOrchLoading(true)
+    setOrchError(false)
+    try {
+      const res = await api.orchestrate(orchMessage)
+      setOrchResponse(JSON.stringify(res, null, 2))
+    } catch (e: unknown) {
+      setOrchError(true)
+      setOrchResponse(e instanceof Error ? e.message : 'Unknown error')
+    } finally {
+      setOrchLoading(false)
+    }
+  }
 
   return (
     <div className="api-explorer">
+      {/* ── Orchestrator Hero Card ── */}
+      <div className="orchestrator-card">
+        <div className="orchestrator-header">
+          <span className="orchestrator-icon">🧬</span>
+          <div>
+            <h2 className="orchestrator-title">DNA Orchestrator</h2>
+            <p className="orchestrator-subtitle">Single API — Full Pipeline. Send one message, get the complete DNA analysis.</p>
+          </div>
+          <span className="method-badge method-POST" style={{ marginLeft: 'auto', alignSelf: 'flex-start' }}>POST</span>
+          <code className="endpoint-path" style={{ alignSelf: 'flex-start' }}>/orchestrate</code>
+        </div>
+        <div className="orchestrator-body">
+          <input
+            className="orchestrator-input"
+            placeholder="e.g. A user cannot login to their account"
+            value={orchMessage}
+            onChange={e => setOrchMessage(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleOrchestrate()}
+          />
+          <button className="orchestrator-btn" onClick={handleOrchestrate} disabled={orchLoading}>
+            {orchLoading ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Analyzing…</> : '🚀 Run Full Pipeline'}
+          </button>
+        </div>
+        {orchResponse !== null && (
+          <pre className={`response-box ${orchError ? 'response-error' : ''}`} style={{ margin: '0 20px 20px' }}>{orchResponse}</pre>
+        )}
+      </div>
+
+      {/* ── Category Groups ── */}
       {categories.map(cat => {
         const catEndpoints = ENDPOINTS.filter(e => (e.category || 'Utility API') === cat)
         if (catEndpoints.length === 0) return null

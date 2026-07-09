@@ -880,3 +880,93 @@ html, body, #root {
   border-color: var(--primary);
   box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
 }
+
+/* ===================== ORCHESTRATOR CARD ===================== */
+.orchestrator-card {
+  background: linear-gradient(145deg, rgba(99, 102, 241, 0.08), rgba(6, 182, 212, 0.06));
+  border: 1.5px solid rgba(99, 102, 241, 0.4);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.1), 0 4px 24px rgba(0, 0, 0, 0.15);
+  margin-bottom: 28px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.orchestrator-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.2), 0 4px 32px rgba(0, 0, 0, 0.2);
+}
+.orchestrator-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px 10px;
+}
+.orchestrator-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
+}
+.orchestrator-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.orchestrator-subtitle {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.orchestrator-body {
+  display: flex;
+  gap: 12px;
+  padding: 12px 24px 20px;
+  align-items: center;
+}
+.orchestrator-input {
+  flex: 1;
+  background: var(--bg-deep);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.orchestrator-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
+}
+.orchestrator-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+.orchestrator-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border: none;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+}
+.orchestrator-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+.orchestrator-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
