@@ -1,4 +1,4 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://dna-modal.onrender.com';
 
 export interface AgentResponse {
   response: string;
