@@ -63,14 +63,21 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     if (selectedProvider) localStorage.setItem('dna_llm_provider', selectedProvider);
     else localStorage.removeItem('dna_llm_provider');
 
-    if (apiKey) localStorage.setItem('dna_llm_api_key', apiKey);
-    else localStorage.removeItem('dna_llm_api_key');
+    // When Independent Graph Mode is selected, clear all LLM-specific settings
+    if (selectedProvider === 'local_graph') {
+      localStorage.removeItem('dna_llm_api_key');
+      localStorage.removeItem('dna_llm_model');
+      localStorage.removeItem('dna_llm_base_url');
+    } else {
+      if (apiKey) localStorage.setItem('dna_llm_api_key', apiKey);
+      else localStorage.removeItem('dna_llm_api_key');
 
-    if (model) localStorage.setItem('dna_llm_model', model);
-    else localStorage.removeItem('dna_llm_model');
+      if (model) localStorage.setItem('dna_llm_model', model);
+      else localStorage.removeItem('dna_llm_model');
 
-    if (baseUrl) localStorage.setItem('dna_llm_base_url', baseUrl);
-    else localStorage.removeItem('dna_llm_base_url');
+      if (baseUrl) localStorage.setItem('dna_llm_base_url', baseUrl);
+      else localStorage.removeItem('dna_llm_base_url');
+    }
 
     setSaved(true);
     setTimeout(() => onClose(), 800);
