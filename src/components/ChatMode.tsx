@@ -19,6 +19,7 @@ export default function ChatMode({ onGraphUpdate, userId }: Props) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [graphKey, setGraphKey] = useState(0) // force graph refresh
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -34,6 +35,7 @@ export default function ChatMode({ onGraphUpdate, userId }: Props) {
     setMessages(prev => [...prev, userMsg])
     setLoading(true)
     try {
+      // Use the Supabase user ID as session_id for the DNA model
       const res = await api.sendAgentMessage(text, userId)
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
@@ -43,11 +45,20 @@ export default function ChatMode({ onGraphUpdate, userId }: Props) {
       }
       setMessages(prev => [...prev, assistantMsg])
       onGraphUpdate()
+      // Force the mini graph to refresh after each message
+      setGraphKey(prev => prev + 1)
     } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Could not reach the API. Is your server running?'
+      
+      // Check if it's an API key issue
+      const isKeyIssue = errorMessage.includes('401') || errorMessage.includes('403') || errorMessage.includes('api_key') || errorMessage.includes('authentication')
+      
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `⚠️ Error: ${err instanceof Error ? err.message : 'Could not reach the API. Is your server running?'}`,
+        content: isKeyIssue
+          ? `⚠️ **API Key Error**: Your API key appears to be invalid or missing. Please go to **⚙️ AI Settings** and enter a valid API key for your chosen provider.\n\n_Error: ${errorMessage}_`
+          : `⚠️ Error: ${errorMessage}`,
       }
       setMessages(prev => [...prev, errorMsg])
     } finally {
@@ -81,6 +92,9 @@ export default function ChatMode({ onGraphUpdate, userId }: Props) {
               <div className="chat-empty-icon">🧬</div>
               <h3>DNA Knowledge Graph Agent</h3>
               <p>Ask me anything or teach me something new! I'll autonomously search or learn from the vector graph.</p>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                💡 Try: "My favorite color is Blue and I live in Kashmir" or "What do you know about me?"
+              </p>
             </div>
           )}
           {messages.map(msg => (
@@ -146,7 +160,7 @@ export default function ChatMode({ onGraphUpdate, userId }: Props) {
         <div className="panel-header">
           <span>🕸️</span> Live Knowledge Graph
         </div>
-        <GraphMode mini />
+        <GraphMode mini key={graphKey} userId={userId} />
       </div>
     </div>
   )

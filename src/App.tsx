@@ -21,6 +21,9 @@ function Dashboard({ user }: { user: User }) {
   const [totalRelationships, setTotalRelationships] = useState(0)
   const [showSettings, setShowSettings] = useState(false)
 
+  // Use the Supabase user ID as the session_id for the DNA model
+  const sessionId = user.id
+
   const fetchStats = useCallback(async () => {
     try {
       await api.ping()
@@ -46,6 +49,9 @@ function Dashboard({ user }: { user: User }) {
 
   const avatarLetter = user.email?.[0].toUpperCase() ?? '?'
   const displayName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+
+  // Check if AI settings are configured
+  const hasProvider = !!localStorage.getItem('dna_llm_provider')
 
   return (
     <div className="app">
@@ -74,10 +80,10 @@ function Dashboard({ user }: { user: User }) {
           <button 
             onClick={() => setShowSettings(true)} 
             className="tab-btn"
-            style={{ color: '#06b6d4', fontWeight: 'bold' }}
+            style={{ color: hasProvider ? '#10b981' : '#f59e0b', fontWeight: 'bold' }}
             title="AI Settings"
           >
-            ⚙️ AI Settings
+            ⚙️ {hasProvider ? 'AI Settings' : '⚠️ Set API Key'}
           </button>
         </nav>
 
@@ -94,10 +100,43 @@ function Dashboard({ user }: { user: User }) {
 
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
 
+      {/* Show a warning banner if no AI provider is configured */}
+      {!hasProvider && (
+        <div style={{
+          padding: '10px 24px',
+          background: 'rgba(245, 158, 11, 0.1)',
+          borderBottom: '1px solid rgba(245, 158, 11, 0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          fontSize: '0.85rem',
+          color: '#f59e0b',
+        }}>
+          ⚠️ No AI provider configured.
+          <button
+            onClick={() => setShowSettings(true)}
+            style={{
+              background: '#f59e0b',
+              color: '#000',
+              border: 'none',
+              padding: '4px 12px',
+              borderRadius: 6,
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+            }}
+          >
+            Set API Key
+          </button>
+          <span style={{ color: 'var(--text-muted)' }}>to enable LLM-powered chat, or select "Independent Graph Mode" for no-LLM usage.</span>
+        </div>
+      )}
+
       <main className="main-content">
-        {activeTab === 'chat' && <ChatMode onGraphUpdate={fetchStats} userId={user.id} />}
+        {activeTab === 'chat' && <ChatMode onGraphUpdate={fetchStats} userId={sessionId} />}
         {activeTab === 'api' && <ApiExplorer />}
-        {activeTab === 'graph' && <GraphMode />}
+        {activeTab === 'graph' && <GraphMode userId={sessionId} />}
       </main>
     </div>
   )

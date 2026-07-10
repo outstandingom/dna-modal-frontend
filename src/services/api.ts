@@ -28,7 +28,10 @@ export const api = {
 
   health: () => request<HealthResponse>('/health'),
 
-  getGraph: () => request<GraphData>('/graph'),
+  getGraph: (sessionId?: string) => {
+    const params = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '';
+    return request<GraphData>(`/graph${params}`);
+  },
 
   getConcepts: () => request<ConceptsResponse>('/concepts'),
 

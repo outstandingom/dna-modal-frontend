@@ -3,7 +3,10 @@ import * as d3 from 'd3'
 import { api } from '../services/api'
 import { GraphData, GraphNode, GraphLink } from '../types/api'
 
-interface Props { mini?: boolean }
+interface Props { 
+  mini?: boolean
+  userId?: string
+}
 
 const COLOR_MAP: Record<string, string> = {
   IS_A: '#6366f1',
@@ -21,7 +24,7 @@ const DOMAIN_COLOR: Record<string, string> = {
   default: '#8b5cf6',
 }
 
-export default function GraphMode({ mini = false }: Props) {
+export default function GraphMode({ mini = false, userId }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -32,10 +35,11 @@ export default function GraphMode({ mini = false }: Props) {
   const fetchGraph = useCallback(async () => {
     try {
       setError('')
-      const data = await api.getGraph()
-      if (!data || data.nodes.length === 0) { 
-        setLoading(false); 
-        return; 
+      const data = await api.getGraph(userId)
+      if (!data || !data.nodes || data.nodes.length === 0) { 
+        setGraphData({ nodes: [], links: [] })
+        setLoading(false)
+        return
       }
       setGraphData(data)
     } catch (e: unknown) {
@@ -43,9 +47,16 @@ export default function GraphMode({ mini = false }: Props) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [userId])
 
+  // Initial fetch
   useEffect(() => { fetchGraph() }, [fetchGraph])
+
+  // Auto-refresh every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(fetchGraph, 5000)
+    return () => clearInterval(interval)
+  }, [fetchGraph])
 
   useEffect(() => {
     if (!svgRef.current || graphData.nodes.length === 0) return
@@ -142,12 +153,14 @@ export default function GraphMode({ mini = false }: Props) {
       {!loading && error && (
         <div className="graph-empty">
           <p style={{ color: 'var(--danger)' }}>⚠️ {error}</p>
+          <button className="ctrl-btn" onClick={fetchGraph} style={{ marginTop: 8 }}>↻ Retry</button>
         </div>
       )}
       {!loading && !error && graphData.nodes.length === 0 && (
         <div className="graph-empty">
           <p style={{ color: 'var(--text-muted)', fontSize: '2rem' }}>🕸️</p>
           <p>No concepts yet. Start chatting to build the graph!</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>The graph auto-refreshes every 5 seconds</p>
         </div>
       )}
       <svg ref={svgRef} className="graph-svg" />
@@ -156,6 +169,9 @@ export default function GraphMode({ mini = false }: Props) {
         <>
           <div className="graph-controls">
             <button className="ctrl-btn" onClick={fetchGraph}>↻ Refresh</button>
+            <span className="ctrl-btn" style={{ cursor: 'default', opacity: 0.6 }}>
+              {graphData.nodes.length} nodes · {graphData.links.length} bonds
+            </span>
           </div>
           <div className="graph-legend">
             <div className="legend-title">Relationship Types</div>
